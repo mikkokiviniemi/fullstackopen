@@ -1,21 +1,15 @@
 const Part = ({ part }) => {
-  return <li>{part.name} {part.exercises}</li>
+  return <div>{part.name} {part.exercises}</div>
 }
 
-
-const Course = ({course}) => {
-
+const Course = ({ course }) => {
   return (
     <div>
-      <ul>
-        {course.map(part => 
+        {course.parts.map(part => 
           <Part key={part.id} part={part} />
         )}
-      </ul>
     </div>
   )
-
-
 }
 
 export default Course

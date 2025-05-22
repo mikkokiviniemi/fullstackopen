@@ -5,22 +5,18 @@ const Header = ({course}) => {
   console.log(course)
   return (
     <div>
-      <h1>{course.name}</h1>
+      <h2>{course.name}</h2>
     </div>
   )
 }
 
-const Total = ({course}) => {
-  console.log(course)
-  let totalExercises = 0;
-  course.total.forEach((part) => {
-    totalExercises += part.exercises;
-  });
+const Total = ({ course }) => {
+  const totalExercises = course.parts.reduce((sum, part) => sum + part.exercises, 0)
   return (
     <div>
-      <p>
+      <h3>
         total of exercises {totalExercises}
-      </p>
+      </h3>
     </div>
   )
 }
@@ -73,9 +69,14 @@ const App = () => {
 
   return (
     <div>
-      <Header course={course} />
-      <Course course={course} />
-      <Total course={course} />
+      <h1>Web development curriculum</h1>
+      {courses.map(course => (
+        <div key={course.id}>
+          <Header course={course} />
+          <Course course={course} />
+          <Total course={course} />
+        </div>
+      ))}
     </div>
   )
 }
