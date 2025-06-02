@@ -1,34 +1,83 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import './index.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+const apiUrl = 'https://studies.cs.helsinki.fi/restcountries/api/all'
+
+const getCountries = async () => {
+  const response = await axios.get(apiUrl)
+  return response.data
+}
+
+const CountryDetails = ({ country }) => (
+  <div>
+    <h2>{country.name.common}</h2>
+    <p>Capital: {country.capital ? country.capital.join(', ') : 'N/A'}</p>
+    <p>Population: {country.population}</p>
+    <p>Area: {country.area} km²</p>
+    <p>Region: {country.region}</p>
+    <h3>Languages</h3>
+    <ul>
+      {country.languages
+        ? Object.values(country.languages).map(language => (
+            <li key={language}>{language}</li>
+          ))
+        : <li>N/A</li>}
+    </ul>
+    <img src={country.flags.png} alt={`Flag of ${country.name.common}`} />
+  </div>
+)
+
+const App = () => {
+  const [countries, setCountries] = useState([])
+  const [filter, setFilter] = useState('')
+  const [filteredCountries, setFilteredCountries] = useState([])
+  const [showCountry, setShowCountry] = useState(null)
+
+  useEffect(() => {
+    getCountries().then(data => {
+      setCountries(data)
+      setFilteredCountries(data)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (filter) {
+      const filtered = countries.filter(country =>
+        country.name.common.toLowerCase().includes(filter.toLowerCase())
+      )
+      setFilteredCountries(filtered)
+      setShowCountry(null)
+    } else {
+      setFilteredCountries(countries)
+      setShowCountry(null)
+    }
+  }, [filter, countries])
 
   return (
-    <>
+    <div>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        find countries{' '}
+        <input
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+        />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      {filteredCountries.length > 10 ? (
+        <p>Too many matches, specify another filter</p>
+      ) : filteredCountries.length === 1 ? (
+        <CountryDetails country={filteredCountries[0]} />
+      ) : showCountry ? (
+        <CountryDetails country={showCountry} />
+      ) : (
+        filteredCountries.map(country => (
+          <div key={country.name.common}>
+            {country.name.common}{' '}
+            <button onClick={() => setShowCountry(country)}>show</button>
+          </div>
+        ))
+      )}
+    </div>
   )
 }
 
